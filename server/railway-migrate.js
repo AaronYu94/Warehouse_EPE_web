@@ -72,13 +72,20 @@ async function migrateToRailway() {
     }
     
     // 测试SQLite连接
-    await new Promise((resolve, reject) => {
-      sqliteDb.get('SELECT 1', (err) => {
-        if (err) reject(err);
-        else resolve();
+    try {
+      await new Promise((resolve, reject) => {
+        sqliteDb.get('SELECT 1', (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
       });
-    });
-    console.log('✅ SQLite连接成功');
+      console.log('✅ SQLite连接成功');
+    } catch (sqliteError) {
+      console.log('⚠️ SQLite连接失败，创建默认数据...');
+      console.log('SQLite错误:', sqliteError.message);
+      await createDefaultData();
+      return;
+    }
     
     // 开始迁移
     console.log('\n📦 开始数据迁移...');
