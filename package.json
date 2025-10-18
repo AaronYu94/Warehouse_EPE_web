@@ -2,9 +2,9 @@
   "name": "warehouseapp",
   "version": "1.0.0",
   "scripts": {
-    "start": "parcel src/index.html",
+    "start": "node server/index-postgres.js",
     "build": "parcel build src/index.html --public-url ./ --no-source-maps && node fix-html.js",
-    "dev": "nodemon server/index-sqlite.js",
+    "dev": "nodemon server/index-postgres.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "vercel-build": "npm run build"
   },
