@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const { db } = require('../db-postgres');
 
 // JWT密钥 - 在生产环境中应该使用环境变量
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'warehouse-epe-production-secret-key-2024-secure';
 
 // 生成JWT令牌
 function generateToken(user) {

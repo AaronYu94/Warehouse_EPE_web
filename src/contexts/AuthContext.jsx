@@ -97,12 +97,18 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       
       if (data.success) {
+        console.log('🔐 登录成功 - 用户:', data.user);
+        console.log('🔐 登录成功 - Token:', data.token ? `${data.token.substring(0, 20)}...` : 'null');
+        
         setUser(data.user);
         setPermissions(data.user.permissions || []);
         localStorage.setItem('user', JSON.stringify(data.user));
         localStorage.setItem('token', data.token);
+        
+        console.log('🔐 Token已存储到localStorage');
         return { success: true };
       } else {
+        console.log('❌ 登录失败:', data.message);
         return { success: false, message: data.message };
       }
     } catch (error) {

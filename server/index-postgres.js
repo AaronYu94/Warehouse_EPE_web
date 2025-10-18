@@ -98,13 +98,23 @@ app.get('/health', (req, res) => {
 // 调试端点 - 检查JWT配置
 app.get('/api/debug/jwt', (req, res) => {
   const jwt = require('jsonwebtoken');
-  const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+  const JWT_SECRET = process.env.JWT_SECRET || 'warehouse-epe-production-secret-key-2024-secure';
   
   res.json({
     jwt_secret_set: !!process.env.JWT_SECRET,
     jwt_secret_length: JWT_SECRET.length,
     jwt_secret_preview: JWT_SECRET.substring(0, 10) + '...',
     environment: process.env.NODE_ENV,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// 测试端点 - 验证token
+app.get('/api/test-token', verifyToken, (req, res) => {
+  res.json({
+    success: true,
+    message: 'Token验证成功',
+    user: req.user,
     timestamp: new Date().toISOString()
   });
 });
