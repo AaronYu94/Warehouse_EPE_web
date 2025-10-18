@@ -419,21 +419,23 @@ async function startServer() {
     console.log('🔍 检查迁移条件...');
     console.log('NODE_ENV:', process.env.NODE_ENV);
     console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+    console.log('DATABASE_URL value:', process.env.DATABASE_URL ? '已设置' : '未设置');
     
-    if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
-      console.log('🚀 检测到生产环境，开始数据迁移...');
+    // 强制运行迁移（用于调试）
+    if (process.env.DATABASE_URL) {
+      console.log('🚀 检测到DATABASE_URL，开始数据迁移...');
       try {
         const { migrateToRailway } = require('./railway-migrate');
         await migrateToRailway();
         console.log('✅ 数据迁移完成');
       } catch (migrationError) {
         console.error('❌ 数据迁移失败:', migrationError);
+        console.error('错误详情:', migrationError.message);
+        console.error('错误堆栈:', migrationError.stack);
         // 不阻止服务器启动，只是记录错误
       }
     } else {
-      console.log('⚠️ 迁移条件未满足，跳过数据迁移');
-      console.log('NODE_ENV:', process.env.NODE_ENV);
-      console.log('DATABASE_URL:', process.env.DATABASE_URL ? '已设置' : '未设置');
+      console.log('⚠️ 未找到DATABASE_URL，跳过数据迁移');
     }
     
     app.listen(PORT, () => {
