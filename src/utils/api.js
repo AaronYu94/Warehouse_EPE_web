@@ -8,6 +8,8 @@ const getToken = () => {
 // 创建带认证头的请求
 const createAuthenticatedRequest = (url, options = {}) => {
   const token = getToken();
+  console.log('🌐 API请求 - URL:', url);
+  console.log('🌐 API请求 - Token:', token ? `${token.substring(0, 20)}...` : 'null');
   
   const headers = {
     'Content-Type': 'application/json',
@@ -16,6 +18,9 @@ const createAuthenticatedRequest = (url, options = {}) => {
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+    console.log('🌐 API请求 - Authorization Header:', `Bearer ${token.substring(0, 20)}...`);
+  } else {
+    console.log('❌ 没有Token，无法发送认证请求');
   }
 
   return fetch(url, {

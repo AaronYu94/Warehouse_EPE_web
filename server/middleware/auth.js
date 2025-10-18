@@ -19,9 +19,14 @@ function generateToken(user) {
 
 // 验证JWT令牌
 function verifyToken(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1]; // Bearer <token>
+  const authHeader = req.headers.authorization;
+  console.log('🔐 验证Token - Authorization Header:', authHeader);
+  
+  const token = authHeader?.split(' ')[1]; // Bearer <token>
+  console.log('🔐 提取的Token:', token ? `${token.substring(0, 20)}...` : 'null');
   
   if (!token) {
+    console.log('❌ 没有提供Token');
     return res.status(401).json({ 
       success: false, 
       message: '访问被拒绝，请先登录' 
@@ -29,10 +34,13 @@ function verifyToken(req, res, next) {
   }
 
   try {
+    console.log('🔐 JWT_SECRET:', JWT_SECRET ? '已设置' : '未设置');
     const decoded = jwt.verify(token, JWT_SECRET);
+    console.log('✅ Token验证成功:', decoded);
     req.user = decoded;
     next();
   } catch (error) {
+    console.log('❌ Token验证失败:', error.message);
     return res.status(401).json({ 
       success: false, 
       message: '无效的访问令牌' 
