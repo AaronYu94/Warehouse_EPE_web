@@ -1,6 +1,6 @@
-import API_BASE_URL from "../config";
 import React, { useState, useEffect } from 'react';
 import { useI18n } from '../contexts/I18nContext';
+import { api } from '../utils/api';
 import { Plus, Edit, Trash2, Search, Filter, Download, Eye, Settings } from 'lucide-react';
 import { 
   pageTitleStyle, 
@@ -78,12 +78,7 @@ const AssetManagementPage = () => {
     const attemptFetch = async () => {
       try {
         console.log(`正在获取资产数据... (尝试 ${retryCount + 1}/${maxRetries})`);
-        const response = await fetch(API_BASE_URL + "/api/assets", {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await api.get("/api/assets");
         
         if (!response.ok) {
           throw new Error('HTTP error! status: ' + response.status);

@@ -1,7 +1,7 @@
-import API_BASE_URL from "../config";
 import React, { useState, useEffect } from 'react';
 import { Trash2, Eye, AlertTriangle, Shield, Database } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
+import { api } from '../utils/api';
 
 const DataManagementPage = () => {
   const { t } = useI18n();
@@ -46,13 +46,13 @@ const DataManagementPage = () => {
         assetsRes,
         financeRes
       ] = await Promise.all([
-        fetch(API_BASE_URL + "/api/raw-inout"),
-        fetch(API_BASE_URL + "/api/aux-inout"),
-        fetch(API_BASE_URL + "/api/product-inbound"),
-        fetch(API_BASE_URL + "/api/raw-outbound"),
-        fetch(API_BASE_URL + "/api/product-outbound"),
-        fetch(API_BASE_URL + "/api/assets"),
-        fetch(API_BASE_URL + "/api/finance/raw-inbound")
+        api.get("/api/raw-inout"),
+        api.get("/api/aux-inout"),
+        api.get("/api/product-inbound"),
+        api.get("/api/raw-outbound"),
+        api.get("/api/product-outbound"),
+        api.get("/api/assets"),
+        api.get("/api/finance/raw-inbound")
       ]);
 
       const data = {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useI18n } from '../contexts/I18nContext';
-import API_BASE_URL from '../config';
+import { api } from '../utils/api';
 import { 
   Home, 
   Package, 
@@ -29,7 +29,7 @@ export default function DashboardPage() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(API_BASE_URL + "/api/dashboard");
+      const response = await api.get("/api/dashboard");
       if (!response.ok) {
         throw new Error(t('errors.dataLoadFailed'));
       }
