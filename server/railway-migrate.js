@@ -87,6 +87,26 @@ async function migrateToRailway() {
       return;
     }
     
+    // 检查SQLite数据库是否有必要的表
+    try {
+      await new Promise((resolve, reject) => {
+        sqliteDb.get('SELECT name FROM sqlite_master WHERE type="table" AND name="users"', (err, row) => {
+          if (err) reject(err);
+          else if (!row) {
+            reject(new Error('users表不存在'));
+          } else {
+            resolve();
+          }
+        });
+      });
+      console.log('✅ SQLite数据库表结构正常');
+    } catch (tableError) {
+      console.log('⚠️ SQLite数据库表结构不完整，创建默认数据...');
+      console.log('表结构错误:', tableError.message);
+      await createDefaultData();
+      return;
+    }
+    
     // 开始迁移
     console.log('\n📦 开始数据迁移...');
     
