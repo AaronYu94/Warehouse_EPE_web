@@ -328,18 +328,7 @@ app.post('/api/logout', verifyToken, (req, res) => {
   res.json({ success: true, message: '登出成功' });
 });
 
-// 原料入库API
-app.get('/api/raw-inout', verifyToken, checkPermission('data.view'), async (req, res) => {
-  try {
-    const result = await db.query(
-      'SELECT * FROM inbound_raw ORDER BY date DESC, created_at DESC'
-    );
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching raw inbound records:', error);
-    res.status(500).json({ error: 'Failed to fetch records' });
-  }
-});
+// 原料入库API - 已移动到下方并修复字段名
 
 app.post('/api/raw-inout', verifyToken, checkPermission('data.create'), upload.single('qualityReport'), async (req, res) => {
   try {
@@ -604,10 +593,17 @@ app.get('/api/product-mappings', verifyToken, checkPermission('data.view'), asyn
   }
 });
 
-// 原料入库API
+// 原料入库API - 修复字段名匹配
 app.get('/api/raw-inout', verifyToken, checkPermission('data.view'), async (req, res) => {
   try {
-    const result = await db.query('SELECT * FROM inbound_raw ORDER BY date DESC');
+    // 使用正确的字段名：name 而不是 material_name, qty 而不是 quantity
+    const result = await db.query(`
+      SELECT 
+        id, date, name as material_name, container, qty as quantity, note,
+        created_at, updated_at
+      FROM inbound_raw 
+      ORDER BY date DESC
+    `);
     res.json(result.rows);
   } catch (error) {
     console.error('Error fetching raw inbound records:', error);
@@ -615,10 +611,17 @@ app.get('/api/raw-inout', verifyToken, checkPermission('data.view'), async (req,
   }
 });
 
-// 原料出库API
+// 原料出库API - 修复字段名匹配
 app.get('/api/raw-out', verifyToken, checkPermission('data.view'), async (req, res) => {
   try {
-    const result = await db.query('SELECT * FROM outbound_raw ORDER BY date DESC');
+    // 使用正确的字段名：name 而不是 material_name, qty 而不是 quantity
+    const result = await db.query(`
+      SELECT 
+        id, date, container, name as material_name, qty as quantity, customer,
+        created_at, updated_at
+      FROM outbound_raw 
+      ORDER BY date DESC
+    `);
     res.json(result.rows);
   } catch (error) {
     console.error('Error fetching raw outbound records:', error);
@@ -642,15 +645,28 @@ app.get('/api/aux-inout', verifyToken, checkPermission('data.view'), async (req,
   try {
     console.log('🔍 查询辅料入库数据...');
     
-    // 先检查表是否存在
+    // 先检查表是否存在，如果不存在则创建
     try {
       const result = await db.query('SELECT * FROM inbound_aux ORDER BY date DESC LIMIT 10');
       console.log('✅ 辅料入库查询成功，返回', result.rows.length, '条记录');
       res.json(result.rows);
     } catch (tableError) {
       if (tableError.code === '42P01') { // 表不存在
-        console.log('⚠️ 表 inbound_aux 不存在，返回空数组');
-        res.json([]);
+        console.log('🔧 创建缺失的表: inbound_aux');
+        await db.query(`
+          CREATE TABLE IF NOT EXISTS inbound_aux (
+            id SERIAL PRIMARY KEY,
+            date DATE NOT NULL,
+            code VARCHAR(50) NOT NULL,
+            name VARCHAR(200) NOT NULL,
+            container VARCHAR(50) NOT NULL,
+            qty NUMERIC(12,3) NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            updated_at TIMESTAMPTZ DEFAULT NOW()
+          )
+        `);
+        console.log('✅ 表 inbound_aux 已创建');
+        res.json([]); // 返回空数组
       } else {
         throw tableError;
       }
