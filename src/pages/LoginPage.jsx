@@ -173,36 +173,54 @@ export default function LoginPage() {
     <div style={loginStyle}>
       <div style={loginFormStyle}>
         {/* 标题和图标 */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <div style={{ 
             display: 'inline-flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            width: '64px',
-            height: '64px',
-            background: theme.colors.primary,
-            borderRadius: '12px',
-            marginBottom: '16px',
-            boxShadow: `0 4px 12px ${theme.colors.primary}30`
+            width: '80px',
+            height: '80px',
+            background: `linear-gradient(135deg, ${theme.colors.primary} 0%, #0056b3 100%)`,
+            borderRadius: '20px',
+            marginBottom: '20px',
+            boxShadow: `0 8px 25px ${theme.colors.primary}40`,
+            position: 'relative',
+            overflow: 'hidden'
           }}>
-            <Warehouse size={32} color="white" />
+            {/* 背景装饰 */}
+            <div style={{
+              position: 'absolute',
+              top: '-10px',
+              right: '-10px',
+              width: '30px',
+              height: '30px',
+              background: 'rgba(255,255,255,0.2)',
+              borderRadius: '50%'
+            }} />
+            <div style={{
+              position: 'absolute',
+              bottom: '-5px',
+              left: '-5px',
+              width: '20px',
+              height: '20px',
+              background: 'rgba(255,255,255,0.15)',
+              borderRadius: '50%'
+            }} />
+            <Warehouse size={40} color="white" style={{ zIndex: 1 }} />
           </div>
-          <h2 style={{ 
+          <h1 style={{ 
             margin: 0, 
-            fontSize: '28px', 
-            fontWeight: '700',
+            fontSize: '36px', 
+            fontWeight: '800',
             color: theme.colors.dark,
-            marginBottom: '8px'
+            letterSpacing: '-0.5px',
+            background: `linear-gradient(135deg, ${theme.colors.primary} 0%, #0056b3 100%)`,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
           }}>
-            仓库管理系统
-          </h2>
-          <p style={{ 
-            margin: 0, 
-            color: theme.colors.gray[600], 
-            fontSize: '16px' 
-          }}>
-            安全登录到仓库管理系统
-          </p>
+            WareEPE
+          </h1>
         </div>
         
         <form onSubmit={handleLogin}>
