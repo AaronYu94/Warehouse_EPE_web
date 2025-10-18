@@ -119,6 +119,36 @@ app.get('/api/test-token', verifyToken, (req, res) => {
   });
 });
 
+// 数据库表检查端点
+app.get('/api/debug/tables', async (req, res) => {
+  try {
+    const tables = [
+      'users', 'materials', 'products', 'product_recipe_mappings',
+      'inbound_raw', 'outbound_raw', 'aux_inbound', 'aux_outbound',
+      'product_inbound', 'product_outbound', 'assets'
+    ];
+    
+    const results = {};
+    
+    for (const table of tables) {
+      try {
+        const result = await db.query(`SELECT COUNT(*) as count FROM ${table}`);
+        results[table] = { exists: true, count: result.rows[0].count };
+      } catch (error) {
+        results[table] = { exists: false, error: error.message };
+      }
+    }
+    
+    res.json({
+      success: true,
+      tables: results,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // 用户认证相关API
 app.post('/api/login', async (req, res) => {
   try {
@@ -559,11 +589,18 @@ app.get('/api/raw-outbound', verifyToken, checkPermission('data.view'), async (r
 // 辅料入库API
 app.get('/api/aux-inout', verifyToken, checkPermission('data.view'), async (req, res) => {
   try {
+    console.log('🔍 查询辅料入库数据...');
     const result = await db.query('SELECT * FROM aux_inbound ORDER BY date DESC');
+    console.log('✅ 辅料入库查询成功，返回', result.rows.length, '条记录');
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching aux inbound records:', error);
-    res.status(500).json({ error: 'Failed to fetch aux inbound records' });
+    console.error('❌ 辅料入库查询失败:', error.message);
+    console.error('❌ 错误详情:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch aux inbound records',
+      details: error.message,
+      table: 'aux_inbound'
+    });
   }
 });
 
