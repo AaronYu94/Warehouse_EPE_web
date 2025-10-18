@@ -2,10 +2,10 @@
   "name": "warehouse-backend",
   "version": "1.0.0",
   "description": "Warehouse Management System Backend",
-  "main": "index-sqlite.js",
+  "main": "index-postgres.js",
   "scripts": {
-    "start": "node index-sqlite.js",
-    "dev": "nodemon index-sqlite.js",
+    "start": "node index-postgres.js",
+    "dev": "nodemon index-postgres.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
