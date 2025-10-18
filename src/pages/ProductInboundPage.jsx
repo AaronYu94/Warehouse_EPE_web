@@ -1,4 +1,4 @@
-import API_BASE_URL from "../config";
+import { api } from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { Database, Plus, Search, Calendar, User } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
@@ -28,7 +28,7 @@ export default function ProductInboundPage() {
   const fetchInboundRecords = async () => {
     setLoading(true);
     try {
-      const response = await fetch(API_BASE_URL + "/api/product-inbound");
+      const response = await api.get("/api/product-inbound");
       if (response.ok) {
         const data = await response.json();
         setInboundRecords(data);
@@ -56,8 +56,7 @@ export default function ProductInboundPage() {
         notes: formData.notes
       };
       
-      const response = await fetch(API_BASE_URL + "/api/product-inbound", {
-        method: 'POST',
+      const response = await api.post("/api/product-inbound",
         headers: {
           'Content-Type': 'application/json',
         },

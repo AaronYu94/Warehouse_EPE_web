@@ -1,7 +1,7 @@
-import API_BASE_URL from "../config";
 import React, { useState, useEffect } from 'react';
 import { Package, TrendingUp, BarChart3, Database } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
+import { api } from '../utils/api';
 
 export default function InventoryPage() {
   const { t } = useI18n();
@@ -21,27 +21,27 @@ export default function InventoryPage() {
     setLoading(true);
     try {
       // 获取原料入库数据
-      const rawInboundResponse = await fetch(API_BASE_URL + "/api/raw-inout");
+      const rawInboundResponse = await api.get("/api/raw-inout");
       const rawInboundData = rawInboundResponse.ok ? await rawInboundResponse.json() : [];
       
       // 获取原料出库数据
-      const rawOutboundResponse = await fetch(API_BASE_URL + "/api/raw-out");
+      const rawOutboundResponse = await api.get("/api/raw-out");
       const rawOutboundData = rawOutboundResponse.ok ? await rawOutboundResponse.json() : [];
       
       // 获取辅料入库数据
-      const auxInboundResponse = await fetch(API_BASE_URL + "/api/aux-inout");
+      const auxInboundResponse = await api.get("/api/aux-inout");
       const auxInboundData = auxInboundResponse.ok ? await auxInboundResponse.json() : [];
       
       // 获取辅料出库数据
-      const auxOutboundResponse = await fetch(API_BASE_URL + "/api/aux-outbound");
+      const auxOutboundResponse = await api.get("/api/aux-outbound");
       const auxOutboundData = auxOutboundResponse.ok ? await auxOutboundResponse.json() : [];
       
       // 获取成品入库数据
-      const productInboundResponse = await fetch(API_BASE_URL + "/api/product-inbound");
+      const productInboundResponse = await api.get("/api/product-inbound");
       const productInboundData = productInboundResponse.ok ? await productInboundResponse.json() : [];
       
       // 获取成品出库数据
-      const productOutboundResponse = await fetch(API_BASE_URL + "/api/product-outbound");
+      const productOutboundResponse = await api.get("/api/product-outbound");
       const productOutboundData = productOutboundResponse.ok ? await productOutboundResponse.json() : [];
       
       // 计算库存

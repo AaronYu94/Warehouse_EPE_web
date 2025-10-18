@@ -1,4 +1,4 @@
-import API_BASE_URL from "../config";
+import { api } from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { ArrowUpRight, Plus, Search, Calendar, User } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
@@ -27,7 +27,7 @@ export default function RawOutboundPage() {
   const fetchOutboundRecords = async () => {
     setLoading(true);
     try {
-      const response = await fetch(API_BASE_URL + "/api/raw-out");
+      const response = await api.get("/api/raw-out");
       if (response.ok) {
         const data = await response.json();
         setOutboundRecords(data);
@@ -54,8 +54,7 @@ export default function RawOutboundPage() {
         notes: formData.notes
       };
       
-      const response = await fetch(API_BASE_URL + "/api/raw-out", {
-        method: 'POST',
+      const response = await api.post("/api/raw-out",
         headers: {
           'Content-Type': 'application/json',
         },

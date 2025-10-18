@@ -198,7 +198,7 @@ const AssetManagementPage = () => {
   const handleDelete = async (id) => {
     if (window.confirm('确定要删除这个资产吗？')) {
       try {
-        const response = await fetch(API_BASE_URL + "/api/assets/" + id, { method: 'DELETE' });
+        const response = await api.delete("/api/assets/" + id);
         if (response.ok) {
           fetchAssets();
         }
@@ -212,8 +212,8 @@ const AssetManagementPage = () => {
     setSelectedAsset(asset);
     try {
       const [maintenanceRes, depreciationRes] = await Promise.all([
-        fetch(API_BASE_URL + "/api/assets/" + asset.id + "/maintenance"),
-        fetch(API_BASE_URL + "/api/assets/" + asset.id + "/depreciation")
+        api.get("/api/assets/" + asset.id + "/maintenance"),
+        api.get("/api/assets/" + asset.id + "/depreciation")
       ]);
       const maintenanceData = await maintenanceRes.json();
       const depreciationData = await depreciationRes.json();

@@ -1,4 +1,4 @@
-import API_BASE_URL from "../config";
+import { api } from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { Box, Plus, Search, Upload, Download } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
@@ -26,7 +26,7 @@ export default function AuxInboundPage() {
   const fetchInboundRecords = async () => {
     setLoading(true);
     try {
-      const response = await fetch(API_BASE_URL + "/api/aux-inout");
+      const response = await api.get("/api/aux-inout");
       if (response.ok) {
         const data = await response.json();
         setInboundRecords(data);
@@ -53,8 +53,7 @@ export default function AuxInboundPage() {
         formDataToSend.append('quality_report', formData.qualityReport);
       }
 
-      const response = await fetch(API_BASE_URL + "/api/aux-inout", {
-        method: 'POST',
+      const response = await api.post("/api/aux-inout",
         body: formDataToSend
       });
 

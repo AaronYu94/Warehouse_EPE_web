@@ -1,4 +1,4 @@
-import API_BASE_URL from "../config";
+import { api } from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { tableStyle, cellStyle } from '../styles';
 import jsPDF from 'jspdf';
@@ -110,7 +110,7 @@ export default function CapitalPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('确定要删除这条记录吗？')) return;
     try {
-      await fetch(API_BASE_URL + "/api/capital/${id}", { method: 'DELETE' });
+      await api.delete("/api/capital/${id}") });
       fetchTableData();
       // 记录操作日志
       await logOperation('删除', '资本记录', `删除资本记录ID：${id}`);
@@ -136,8 +136,7 @@ export default function CapitalPage() {
   const handleEditSave = async () => {
     setEditSubmitting(true);
     try {
-      await fetch(API_BASE_URL + "/api/capital/${editingId}", {
-        method: 'PUT',
+      await api.put("/api/capital/${editingId}",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm)
       });

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Plus, Search, Upload, FileText, Download } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
-import API_BASE_URL from '../config';
+import { api } from '../utils/api';
 
 export default function InboundPage() {
   const { t } = useI18n();
@@ -27,7 +27,7 @@ export default function InboundPage() {
   const fetchInboundRecords = async () => {
     setLoading(true);
     try {
-      const response = await fetch(API_BASE_URL + "/api/raw-inout");
+      const response = await api.get("/api/raw-inout");
       if (response.ok) {
         const data = await response.json();
         setInboundRecords(data);
@@ -56,8 +56,7 @@ export default function InboundPage() {
         formDataToSend.append('quality_report', formData.qualityReport);
       }
 
-      const response = await fetch(API_BASE_URL + "/api/raw-inout", {
-        method: 'POST',
+      const response = await api.post("/api/raw-inout",
         body: formDataToSend
       });
 

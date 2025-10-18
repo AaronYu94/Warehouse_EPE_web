@@ -1,4 +1,4 @@
-import API_BASE_URL from "../config";
+import { api } from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { useI18n } from '../contexts/I18nContext';
 import { Activity, Package, Box, Search, Filter, Download } from 'lucide-react';
@@ -19,7 +19,7 @@ export default function ReferenceDataPage() {
   const fetchReferenceData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(API_BASE_URL + "/api/reference-data");
+      const response = await api.get("/api/reference-data");
       if (!response.ok) {
         throw new Error('获取数据失败');
       }

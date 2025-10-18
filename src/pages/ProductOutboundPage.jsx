@@ -1,4 +1,4 @@
-import API_BASE_URL from "../config";
+import { api } from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, Plus, Search, Calendar, User } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
@@ -57,7 +57,7 @@ export default function ProductOutboundPage() {
   const fetchOutboundRecords = async () => {
     setLoading(true);
     try {
-      const response = await fetch(API_BASE_URL + "/api/product-outbound");
+      const response = await api.get("/api/product-outbound");
       if (response.ok) {
         const data = await response.json();
         setOutboundRecords(data);
@@ -71,7 +71,7 @@ export default function ProductOutboundPage() {
 
   const fetchProductInboundData = async () => {
     try {
-      const response = await fetch(API_BASE_URL + "/api/product-inbound");
+      const response = await api.get("/api/product-inbound");
       if (response.ok) {
         const data = await response.json();
         setProductInboundData(data);
@@ -83,7 +83,7 @@ export default function ProductOutboundPage() {
 
   const fetchAuxMappingData = async () => {
     try {
-      const response = await fetch(API_BASE_URL + "/api/product-aux-mapping");
+      const response = await api.get("/api/product-aux-mapping");
       if (response.ok) {
         const data = await response.json();
         setAuxMappingData(data);
@@ -224,8 +224,7 @@ export default function ProductOutboundPage() {
             aux_usage: materialUsageJson
           };
           
-          const response = await fetch(API_BASE_URL + "/api/product-outbound", {
-            method: 'POST',
+          const response = await api.post("/api/product-outbound",
             headers: {
               'Content-Type': 'application/json',
             },
