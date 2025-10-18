@@ -441,6 +441,9 @@ async function startServer() {
       console.error('完整错误对象:', migrationError);
     }
     
+    // 添加一个简单的测试
+    console.log('🧪 测试日志输出 - 如果你看到这条消息，说明代码已更新');
+    
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
