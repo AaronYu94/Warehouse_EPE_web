@@ -416,6 +416,10 @@ async function startServer() {
     await initDatabase();
     
     // 在Railway环境中自动运行数据迁移
+    console.log('🔍 检查迁移条件...');
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+    
     if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
       console.log('🚀 检测到生产环境，开始数据迁移...');
       try {
@@ -426,6 +430,10 @@ async function startServer() {
         console.error('❌ 数据迁移失败:', migrationError);
         // 不阻止服务器启动，只是记录错误
       }
+    } else {
+      console.log('⚠️ 迁移条件未满足，跳过数据迁移');
+      console.log('NODE_ENV:', process.env.NODE_ENV);
+      console.log('DATABASE_URL:', process.env.DATABASE_URL ? '已设置' : '未设置');
     }
     
     app.listen(PORT, () => {
