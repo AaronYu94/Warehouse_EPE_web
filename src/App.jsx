@@ -30,27 +30,28 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/*" element={
-              <div style={{ display:'flex', height:'100vh', position: 'relative' }}>
-                <Sidebar />
-                <main style={mainStyle}>
-                  <Routes>
-                    <Route path="/"            element={<DashboardPage />} />
-
-                    <Route path="/inbound"     element={<InboundPage />} />
-                    <Route path="/aux-inbound" element={<AuxInboundPage />} />
-                    <Route path="/product-inbound" element={<ProductInboundPage />} />
-                    <Route path="/raw-outbound" element={<RawOutboundPage />} />
-                    <Route path="/product-outbound" element={<ProductOutboundPage />} />
-                    <Route path="/inventory"   element={<InventoryPage />} />
-                    <Route path="/reference-data" element={<ReferenceDataPage />} />
-                    <Route path="/asset-management" element={<AssetManagementPage />} />
-                    <Route path="/finance" element={<FinancePage />} />
-                    <Route path="/data-management" element={<DataManagementPage />} />
-                    <Route path="*"            element={<MainPage />} />
-                  </Routes>
-                </main>
-                <Footer />
-              </div>
+              <ProtectedRoute>
+                <div style={{ display:'flex', height:'100vh', position: 'relative' }}>
+                  <Sidebar />
+                  <main style={mainStyle}>
+                    <Routes>
+                      <Route path="/"            element={<DashboardPage />} />
+                      <Route path="/inbound"     element={<InboundPage />} />
+                      <Route path="/aux-inbound" element={<AuxInboundPage />} />
+                      <Route path="/product-inbound" element={<ProductInboundPage />} />
+                      <Route path="/raw-outbound" element={<RawOutboundPage />} />
+                      <Route path="/product-outbound" element={<ProductOutboundPage />} />
+                      <Route path="/inventory"   element={<InventoryPage />} />
+                      <Route path="/reference-data" element={<ReferenceDataPage />} />
+                      <Route path="/asset-management" element={<AssetManagementPage />} />
+                      <Route path="/finance" element={<FinancePage />} />
+                      <Route path="/data-management" element={<DataManagementPage />} />
+                      <Route path="*"            element={<MainPage />} />
+                    </Routes>
+                  </main>
+                  <Footer />
+                </div>
+              </ProtectedRoute>
             } />
           </Routes>
         </Router>

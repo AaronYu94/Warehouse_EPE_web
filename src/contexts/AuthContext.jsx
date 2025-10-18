@@ -22,8 +22,12 @@ export const AuthProvider = ({ children }) => {
     const savedToken = localStorage.getItem('token');
     
     if (savedUser && savedToken) {
-      setUser(JSON.parse(savedUser));
-      // 验证令牌是否仍然有效
+      // 先设置用户信息，避免延迟
+      const userData = JSON.parse(savedUser);
+      setUser(userData);
+      setPermissions(userData.permissions || []);
+      
+      // 异步验证令牌
       validateToken();
     } else {
       setLoading(false);
@@ -38,16 +42,24 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
+      // 设置超时，避免长时间等待
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3秒超时
+
       const response = await fetch(API_BASE_URL + '/api/me', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
+          // 更新用户信息
           setUser(data.user);
           setPermissions(data.user.permissions || []);
           localStorage.setItem('user', JSON.stringify(data.user));
@@ -60,8 +72,13 @@ export const AuthProvider = ({ children }) => {
         logout();
       }
     } catch (error) {
-      console.error('Token validation error:', error);
-      logout();
+      if (error.name === 'AbortError') {
+        console.log('Token validation timeout, using cached user data');
+        // 超时情况下使用缓存的用户数据
+      } else {
+        console.error('Token validation error:', error);
+        logout();
+      }
     } finally {
       setLoading(false);
     }
