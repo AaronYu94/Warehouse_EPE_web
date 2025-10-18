@@ -1,159 +1,154 @@
-# 🚀 仓库管理系统云端部署指南
+# 仓库管理系统云端部署指南
 
-## 📋 部署架构
+## 🌐 推荐部署方案
 
-```
-前端 (Vercel) ←→ 后端 (Railway) ←→ 数据库 (PostgreSQL)
-```
+### 前端：Vercel（免费）
+- ✅ 完全免费，无限制
+- ✅ 全球CDN，访问速度快
+- ✅ 自动部署，Git推送即更新
+- ✅ 自动HTTPS证书
+- ✅ 支持自定义域名
 
-- **前端**: Vercel (免费静态托管)
-- **后端**: Railway (¥35/月)
-- **数据库**: PostgreSQL (Railway内置)
+### 后端：Railway（$5/月）
+- ✅ 价格便宜，仅$5/月
+- ✅ PostgreSQL数据库，比SQLite更适合生产环境
+- ✅ 自动备份，数据安全
+- ✅ 环境变量管理
+- ✅ 日志监控
 
-## 🛠️ 部署步骤
+## 🚀 部署步骤
 
-### 第一步：准备代码仓库
-
-1. **推送代码到GitHub**
-   ```bash
-   git add .
-   git commit -m "准备云端部署"
-   git push origin main
-   ```
-
-### 第二步：部署后端到Railway
+### 第一步：部署后端到Railway
 
 1. **注册Railway账户**
-   - 访问 [railway.app](https://railway.app)
-   - 使用GitHub账户登录
+   - 访问 https://railway.app
+   - 使用GitHub登录
 
 2. **创建新项目**
    - 点击 "New Project"
    - 选择 "Deploy from GitHub repo"
    - 选择你的仓库
-   - 选择 `server` 文件夹作为根目录
 
-3. **配置环境变量**
-   在Railway项目设置中添加：
-   ```
-   NODE_ENV=production
-   PORT=4000
-   FRONTEND_URL=https://your-frontend-domain.vercel.app
-   ```
+3. **配置后端服务**
+   - 选择 `server` 文件夹作为根目录
+   - Railway会自动检测到 `package.json`
+   - 设置环境变量：
+     ```
+     NODE_ENV=production
+     PORT=3000
+     ```
 
 4. **添加PostgreSQL数据库**
-   - 在Railway项目中点击 "New"
-   - 选择 "Database" → "PostgreSQL"
-   - Railway会自动提供 `DATABASE_URL` 环境变量
+   - 在项目中点击 "New"
+   - 选择 "Database" -> "PostgreSQL"
+   - Railway会自动创建数据库
 
 5. **获取后端URL**
-   - 部署完成后，Railway会提供类似 `https://xxx.up.railway.app` 的URL
-   - 记录这个URL，稍后需要配置到前端
+   - 部署完成后，Railway会提供类似 `https://your-app.railway.app` 的URL
+   - 记录这个URL，稍后配置前端
 
-### 第三步：部署前端到Vercel
+### 第二步：部署前端到Vercel
 
 1. **注册Vercel账户**
-   - 访问 [vercel.com](https://vercel.com)
-   - 使用GitHub账户登录
+   - 访问 https://vercel.com
+   - 使用GitHub登录
 
 2. **导入项目**
    - 点击 "New Project"
    - 选择你的GitHub仓库
    - 选择根目录（不是server文件夹）
 
-3. **配置构建设置**
-   - Framework Preset: `Other`
-   - Build Command: `npm run build`
-   - Output Directory: `dist`
-   - Install Command: `npm install`
+3. **配置环境变量**
+   - 在项目设置中添加环境变量：
+     ```
+     REACT_APP_API_URL=https://your-app.railway.app
+     ```
 
-4. **设置环境变量**
-   在Vercel项目设置中添加：
-   ```
-   REACT_APP_API_URL=https://your-backend-url.up.railway.app
-   ```
+4. **部署**
+   - Vercel会自动构建和部署
+   - 获得类似 `https://your-app.vercel.app` 的URL
 
-5. **部署**
-   - 点击 "Deploy"
-   - 等待构建完成
-   - 获取前端URL，类似 `https://your-project.vercel.app`
+### 第三步：配置数据库
 
-### 第四步：更新配置
+1. **获取数据库连接信息**
+   - 在Railway项目中找到PostgreSQL服务
+   - 复制连接字符串
 
-1. **更新后端CORS设置**
-   - 在Railway项目设置中更新 `FRONTEND_URL` 为你的Vercel URL
+2. **初始化数据库**
+   - 使用数据库管理工具连接
+   - 运行 `schema/schema.sql` 创建表结构
+   - 运行 `init-all-data.js` 初始化数据
 
-2. **更新前端API配置**
-   - 在Vercel项目设置中更新 `REACT_APP_API_URL` 为你的Railway URL
+## 🔧 配置说明
 
-## 🔧 数据库迁移
+### 环境变量
 
-如果你有现有的SQLite数据需要迁移：
+**后端环境变量（Railway）：**
+```
+NODE_ENV=production
+PORT=3000
+DATABASE_URL=postgresql://user:password@host:port/database
+```
+
+**前端环境变量（Vercel）：**
+```
+REACT_APP_API_URL=https://your-backend.railway.app
+```
+
+### 数据库迁移
+
+从SQLite迁移到PostgreSQL：
 
 1. **导出SQLite数据**
    ```bash
-   # 在本地运行
-   sqlite3 server/warehouse.db .dump > data_export.sql
+   sqlite3 warehouse.db .dump > data.sql
    ```
 
 2. **转换数据格式**
-   - 将SQLite的SQL语法转换为PostgreSQL语法
-   - 主要差异：UUID、数据类型、语法
+   - 修改SQL语法以适配PostgreSQL
+   - 处理数据类型差异
 
 3. **导入到PostgreSQL**
    ```bash
-   # 连接到Railway的PostgreSQL数据库
-   psql $DATABASE_URL < converted_data.sql
+   psql $DATABASE_URL < data.sql
    ```
 
-## 🌐 自定义域名（可选）
+## 💰 成本分析
 
-### 前端域名
-1. 在Vercel项目设置中添加自定义域名
-2. 配置DNS记录指向Vercel
+| 服务 | 费用 | 说明 |
+|------|------|------|
+| Vercel | 免费 | 前端托管 |
+| Railway | $5/月 | 后端+数据库 |
+| 域名 | $10-15/年 | 可选，自定义域名 |
+| **总计** | **$5/月** | **约$60/年** |
 
-### 后端域名
-1. 在Railway项目设置中添加自定义域名
-2. 配置DNS记录指向Railway
+## 🔒 安全配置
 
-## 💰 成本估算
+1. **HTTPS证书**
+   - Vercel和Railway都自动提供HTTPS
+   - 无需额外配置
 
-### 基础方案（推荐）
-- **前端**: Vercel (免费)
-- **后端**: Railway ($5/月 ≈ ¥35/月)
-- **数据库**: 包含在Railway中
-- **总计**: ¥35/月
+2. **CORS设置**
+   - 后端已配置允许前端域名访问
+   - 生产环境需要更新CORS设置
 
-### 高级方案
-- **前端**: Vercel (免费)
-- **后端**: Railway ($5/月)
-- **数据库**: 独立PostgreSQL ($5/月)
-- **域名**: $10/年
-- **总计**: ¥70/月 + ¥70/年
+3. **环境变量**
+   - 敏感信息存储在环境变量中
+   - 不在代码中硬编码
 
-## 🧪 测试部署
+## 📊 监控和维护
 
-部署完成后，测试以下功能：
+1. **日志查看**
+   - Railway提供实时日志
+   - Vercel提供部署日志
 
-### 基础功能测试
-- [ ] 访问前端URL，页面正常加载
-- [ ] 用户登录功能
-- [ ] 仪表盘数据显示
+2. **性能监控**
+   - Railway提供CPU/内存使用情况
+   - Vercel提供访问统计
 
-### 核心功能测试
-- [ ] 原料入库
-- [ ] 辅料入库
-- [ ] 成品入库
-- [ ] 原料出库
-- [ ] 成品出库
-- [ ] 库存查看
-- [ ] 文件上传
-
-### 高级功能测试
-- [ ] 财务管理
-- [ ] 资产管理
-- [ ] 数据导出
-- [ ] 多用户权限
+3. **备份策略**
+   - Railway自动备份数据库
+   - 建议定期导出数据
 
 ## 🆘 故障排除
 
@@ -161,75 +156,30 @@
 
 1. **前端无法连接后端**
    - 检查 `REACT_APP_API_URL` 环境变量
-   - 确认后端URL正确
-   - 检查CORS设置
+   - 确认后端服务正常运行
 
 2. **数据库连接失败**
    - 检查 `DATABASE_URL` 环境变量
-   - 确认PostgreSQL服务正常运行
-   - 检查网络连接
+   - 确认数据库服务已启动
 
-3. **文件上传失败**
-   - 检查文件大小限制
-   - 确认uploads目录权限
-   - 检查multer配置
+3. **CORS错误**
+   - 检查后端CORS配置
+   - 确认前端域名在允许列表中
 
-4. **构建失败**
-   - 检查package.json依赖
-   - 确认Node.js版本
-   - 查看构建日志
+### 联系支持
 
-### 日志查看
+- Railway支持：https://railway.app/docs
+- Vercel支持：https://vercel.com/docs
+- 项目文档：查看README.md
 
-**Vercel日志**:
-- 在Vercel项目页面查看 "Functions" 标签
-- 查看实时日志和错误信息
+## 🎯 下一步
 
-**Railway日志**:
-- 在Railway项目页面查看 "Deployments"
-- 点击部署查看详细日志
-
-## 📞 技术支持
-
-如遇到问题，请提供：
-1. 错误截图
-2. 部署日志
-3. 浏览器控制台输出
-4. 网络请求状态
-
-## 🔄 更新部署
-
-### 前端更新
-```bash
-git add .
-git commit -m "更新前端"
-git push origin main
-# Vercel会自动重新部署
-```
-
-### 后端更新
-```bash
-git add .
-git commit -m "更新后端"
-git push origin main
-# Railway会自动重新部署
-```
-
-## 📊 监控和维护
-
-### 性能监控
-- Vercel Analytics (免费)
-- Railway Metrics (内置)
-
-### 数据备份
-- PostgreSQL自动备份
-- 定期导出数据
-
-### 安全更新
-- 定期更新依赖包
-- 监控安全漏洞
-- 更新SSL证书
+1. 部署完成后测试所有功能
+2. 配置自定义域名（可选）
+3. 设置监控和告警
+4. 准备用户培训材料
+5. 制定维护计划
 
 ---
 
-🎉 **恭喜！你的仓库管理系统已成功部署到云端！**
+**部署完成后，你的客户就可以通过网页访问仓库管理系统了！**

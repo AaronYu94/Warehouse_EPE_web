@@ -24,6 +24,19 @@ console.log('🚀 开始Railway数据迁移...');
 console.log('📊 数据源:', SQLITE_DB_PATH);
 console.log('🎯 目标:', POSTGRES_URL.replace(/\/\/.*@/, '//***@')); // 隐藏密码
 
+// 检查SQLite文件是否存在
+if (!fs.existsSync(SQLITE_DB_PATH)) {
+  console.error('❌ 错误: SQLite文件不存在:', SQLITE_DB_PATH);
+  console.log('📁 当前目录内容:');
+  try {
+    const files = fs.readdirSync(path.join(__dirname, '..'));
+    console.log(files);
+  } catch (err) {
+    console.log('无法读取目录:', err.message);
+  }
+  console.log('⚠️ 跳过SQLite数据迁移，直接创建默认数据');
+}
+
 // 连接PostgreSQL
 const pgPool = new Pool({
   connectionString: POSTGRES_URL,
@@ -50,6 +63,13 @@ async function migrateToRailway() {
     // 测试PostgreSQL连接
     await pgPool.query('SELECT 1');
     console.log('✅ PostgreSQL连接成功');
+    
+    // 检查SQLite文件是否存在
+    if (!fs.existsSync(SQLITE_DB_PATH)) {
+      console.log('⚠️ SQLite文件不存在，创建默认数据...');
+      await createDefaultData();
+      return;
+    }
     
     // 测试SQLite连接
     await new Promise((resolve, reject) => {
@@ -303,6 +323,72 @@ async function createSecurePasswords() {
       console.error(`   ❌ 更新用户 ${username} 密码失败:`, error);
       migrationStats.errors++;
     }
+  }
+}
+
+// 创建默认数据
+async function createDefaultData() {
+  console.log('📦 创建默认数据...');
+  
+  try {
+    // 创建用户表
+    await pgPool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        username VARCHAR(50) UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        role VARCHAR(50) NOT NULL DEFAULT 'operator',
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    
+    // 创建物料表
+    await pgPool.query(`
+      CREATE TABLE IF NOT EXISTS materials (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        code VARCHAR(50) UNIQUE NOT NULL,
+        name VARCHAR(200) NOT NULL,
+        unit VARCHAR(50) NOT NULL,
+        min_stock_level NUMERIC(12,3) DEFAULT 0,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    
+    // 创建产品表
+    await pgPool.query(`
+      CREATE TABLE IF NOT EXISTS products (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        code VARCHAR(50) UNIQUE NOT NULL,
+        name VARCHAR(200) NOT NULL,
+        unit VARCHAR(50) NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    
+    // 创建默认用户
+    const bcrypt = require('bcryptjs');
+    const defaultUsers = [
+      { username: 'admin', password: await bcrypt.hash('Admin@2024!Secure', 12), role: 'admin' },
+      { username: 'operator', password: await bcrypt.hash('Operator@2024!Safe', 12), role: 'operator' },
+      { username: 'viewer', password: await bcrypt.hash('Viewer@2024!Read', 12), role: 'viewer' }
+    ];
+    
+    for (const user of defaultUsers) {
+      await pgPool.query(
+        'INSERT INTO users (username, password, role) VALUES ($1, $2, $3) ON CONFLICT (username) DO NOTHING',
+        [user.username, user.password, user.role]
+      );
+      console.log(`✅ 用户 ${user.username} 已创建`);
+    }
+    
+    console.log('✅ 默认数据创建完成');
+    
+  } catch (error) {
+    console.error('❌ 创建默认数据失败:', error);
+    throw error;
   }
 }
 
