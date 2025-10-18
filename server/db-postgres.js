@@ -28,7 +28,7 @@ pool.on('error', (err) => {
 async function initDatabase() {
   try {
     // 读取SQL文件
-    const schemaPath = path.join(__dirname, 'schema', 'schema_full.sql');
+    const schemaPath = path.join(__dirname, 'schema', 'schema_postgres.sql');
     const schemaSQL = fs.readFileSync(schemaPath, 'utf8');
     
     // 执行SQL

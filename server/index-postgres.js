@@ -668,6 +668,11 @@ app.use((error, req, res, next) => {
 // 启动服务器
 async function startServer() {
   try {
+    // 修复数据库表结构
+    console.log('🔧 开始修复数据库表结构...');
+    const { fixDatabase } = require('./fix-database');
+    await fixDatabase();
+    
     // 初始化数据库
     await initDatabase();
     
