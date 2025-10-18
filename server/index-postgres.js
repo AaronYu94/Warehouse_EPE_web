@@ -400,6 +400,81 @@ app.get('/api/dashboard', async (req, res) => {
   }
 });
 
+// 参考数据API
+app.get('/api/reference-data', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const [materials, products, productMappings] = await Promise.all([
+      db.query('SELECT * FROM materials ORDER BY code'),
+      db.query('SELECT * FROM products ORDER BY code'),
+      db.query('SELECT * FROM product_recipe_mappings ORDER BY product_name, material_name')
+    ]);
+
+    res.json({
+      materials: materials.rows,
+      products: products.rows,
+      productMappings: productMappings.rows
+    });
+  } catch (error) {
+    console.error('Error fetching reference data:', error);
+    res.status(500).json({ error: 'Failed to fetch reference data' });
+  }
+});
+
+// 资产管理API
+app.get('/api/assets', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM assets ORDER BY name');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching assets:', error);
+    res.status(500).json({ error: 'Failed to fetch assets' });
+  }
+});
+
+app.get('/api/assets/:category', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const { category } = req.params;
+    const result = await db.query('SELECT * FROM assets WHERE category = $1 ORDER BY name', [category]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching assets by category:', error);
+    res.status(500).json({ error: 'Failed to fetch assets by category' });
+  }
+});
+
+// 物料管理API
+app.get('/api/materials', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM materials ORDER BY code');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching materials:', error);
+    res.status(500).json({ error: 'Failed to fetch materials' });
+  }
+});
+
+// 产品管理API
+app.get('/api/products', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM products ORDER BY code');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
+// 产品配方API
+app.get('/api/product-mappings', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM product_recipe_mappings ORDER BY product_name, material_name');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching product mappings:', error);
+    res.status(500).json({ error: 'Failed to fetch product mappings' });
+  }
+});
+
 // 错误处理中间件
 app.use((error, req, res, next) => {
   console.error('Server error:', error);
