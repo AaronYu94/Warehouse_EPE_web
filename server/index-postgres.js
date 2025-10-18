@@ -149,6 +149,62 @@ app.get('/api/debug/tables', async (req, res) => {
   }
 });
 
+// 详细数据库表结构检查端点
+app.get('/api/debug/table-structure', async (req, res) => {
+  try {
+    const tables = [
+      'users', 'materials', 'products', 'product_recipe_mappings',
+      'inbound_raw', 'outbound_raw', 'inbound_aux', 'outbound_aux',
+      'product_inbound', 'product_outbound', 'assets'
+    ];
+    
+    const results = {};
+    
+    for (const table of tables) {
+      try {
+        // 检查表是否存在
+        const existsResult = await db.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_name = $1
+          );
+        `, [table]);
+        
+        if (existsResult.rows[0].exists) {
+          // 获取表结构
+          const structureResult = await db.query(`
+            SELECT column_name, data_type, is_nullable, column_default
+            FROM information_schema.columns 
+            WHERE table_name = $1
+            ORDER BY ordinal_position;
+          `, [table]);
+          
+          // 获取记录数
+          const countResult = await db.query(`SELECT COUNT(*) as count FROM ${table}`);
+          
+          results[table] = {
+            exists: true,
+            count: countResult.rows[0].count,
+            columns: structureResult.rows
+          };
+        } else {
+          results[table] = { exists: false, error: 'Table does not exist' };
+        }
+      } catch (error) {
+        results[table] = { exists: false, error: error.message };
+      }
+    }
+    
+    res.json({
+      success: true,
+      tables: results,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // 简单测试端点 - 直接返回空数组
 app.get('/api/test-simple', (req, res) => {
   res.json({ 
@@ -581,18 +637,31 @@ app.get('/api/raw-outbound', verifyToken, checkPermission('data.view'), async (r
   }
 });
 
-// 辅料入库API - 临时简化版本
+// 辅料入库API - 逐步恢复数据库查询
 app.get('/api/aux-inout', verifyToken, checkPermission('data.view'), async (req, res) => {
   try {
     console.log('🔍 查询辅料入库数据...');
-    // 临时返回空数组，避免数据库查询错误
-    res.json([]);
-    console.log('✅ 辅料入库查询成功，返回空数组');
+    
+    // 先检查表是否存在
+    try {
+      const result = await db.query('SELECT * FROM inbound_aux ORDER BY date DESC LIMIT 10');
+      console.log('✅ 辅料入库查询成功，返回', result.rows.length, '条记录');
+      res.json(result.rows);
+    } catch (tableError) {
+      if (tableError.code === '42P01') { // 表不存在
+        console.log('⚠️ 表 inbound_aux 不存在，返回空数组');
+        res.json([]);
+      } else {
+        throw tableError;
+      }
+    }
   } catch (error) {
     console.error('❌ 辅料入库查询失败:', error.message);
+    console.error('❌ 错误详情:', error);
     res.status(500).json({ 
       error: 'Failed to fetch aux inbound records',
-      details: error.message
+      details: error.message,
+      table: 'inbound_aux'
     });
   }
 });
