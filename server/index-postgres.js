@@ -95,6 +95,20 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// 调试端点 - 检查JWT配置
+app.get('/api/debug/jwt', (req, res) => {
+  const jwt = require('jsonwebtoken');
+  const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+  
+  res.json({
+    jwt_secret_set: !!process.env.JWT_SECRET,
+    jwt_secret_length: JWT_SECRET.length,
+    jwt_secret_preview: JWT_SECRET.substring(0, 10) + '...',
+    environment: process.env.NODE_ENV,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // 用户认证相关API
 app.post('/api/login', async (req, res) => {
   try {
@@ -120,12 +134,16 @@ app.post('/api/login', async (req, res) => {
     }
     
     const user = result.rows[0];
+    console.log('🔐 登录尝试 - 用户:', user.username, '角色:', user.role);
     
     // 验证密码（支持明文密码和加密密码）
     const isValidPassword = user.password === password || 
                            await bcrypt.compare(password, user.password);
     
+    console.log('🔐 密码验证结果:', isValidPassword);
+    
     if (!isValidPassword) {
+      console.log('❌ 密码验证失败');
       return res.status(401).json({ 
         success: false, 
         message: '用户名或密码错误' 
@@ -134,6 +152,8 @@ app.post('/api/login', async (req, res) => {
     
     // 生成JWT令牌
     const token = generateToken(user);
+    console.log('🔐 生成的Token:', token ? `${token.substring(0, 20)}...` : 'null');
+    console.log('🔐 JWT_SECRET状态:', process.env.JWT_SECRET ? '已设置' : '使用默认值');
     
     res.json({
       success: true,
@@ -141,7 +161,8 @@ app.post('/api/login', async (req, res) => {
       user: {
         id: user.id,
         username: user.username,
-        role: user.role
+        role: user.role,
+        permissions: user.permissions || []
       }
     });
   } catch (error) {
