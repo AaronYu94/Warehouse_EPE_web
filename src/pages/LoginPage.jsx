@@ -17,7 +17,6 @@ const loginStyle = {
 };
 
 const loginFormStyle = {
-  ...cardStyle,
   width: '100%',
   maxWidth: '420px',
   padding: '40px',
@@ -84,15 +83,6 @@ const errorStyle = {
   gap: '8px'
 };
 
-const securityNoticeStyle = {
-  background: '#fff3cd',
-  border: '1px solid #ffeaa7',
-  borderRadius: '8px',
-  padding: '16px',
-  marginTop: '24px',
-  fontSize: '14px',
-  color: '#856404'
-};
 
 const passwordStrengthStyle = {
   marginTop: '8px',
@@ -291,43 +281,6 @@ export default function LoginPage() {
             {isLoading ? '登录中...' : t('login.submit')}
           </button>
         </form>
-        
-        {/* 安全提示 */}
-        <div style={securityNoticeStyle}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-            <Shield size={16} style={{ marginRight: '8px' }} />
-            <strong>安全提示</strong>
-          </div>
-          <p style={{ margin: 0, fontSize: '13px' }}>
-            为了您的账户安全，请使用强密码并定期更换。建议密码包含大小写字母、数字和特殊字符。
-          </p>
-        </div>
-        
-        {/* 默认账户信息 */}
-        <div style={{ 
-          marginTop: '24px', 
-          padding: '16px', 
-          background: theme.colors.gray[100], 
-          borderRadius: '8px',
-          border: `1px solid ${theme.colors.gray[200]}`
-        }}>
-          <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', color: theme.colors.dark }}>
-            🔐 默认账户（请及时修改密码）
-          </h4>
-          <div style={{ fontSize: '13px', color: theme.colors.gray[600], lineHeight: '1.6' }}>
-            <div><strong>管理员:</strong> admin / <span style={{color: theme.colors.success, fontFamily: 'monospace'}}>Admin@2024!Secure</span></div>
-            <div><strong>操作员:</strong> operator / <span style={{color: theme.colors.success, fontFamily: 'monospace'}}>Operator@2024!Safe</span></div>
-            <div><strong>查看者:</strong> viewer / <span style={{color: theme.colors.success, fontFamily: 'monospace'}}>Viewer@2024!Read</span></div>
-          </div>
-          <div style={{ 
-            marginTop: '8px', 
-            fontSize: '12px', 
-            color: theme.colors.danger,
-            fontWeight: '500'
-          }}>
-            ⚠️ 生产环境部署前必须修改这些默认密码！
-          </div>
-        </div>
       </div>
     </div>
   );
