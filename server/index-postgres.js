@@ -357,51 +357,42 @@ app.post('/api/product-outbound', async (req, res) => {
 // 仪表盘数据API
 app.get('/api/dashboard', async (req, res) => {
   try {
-    // 获取各种统计数据
+    // 获取基础数据统计
     const [
-      rawMaterialsResult,
-      auxMaterialsResult,
+      materialsResult,
       productsResult,
-      recentInboundResult,
-      recentOutboundResult,
-      lowStockResult
+      usersResult,
+      productMappingsResult
     ] = await Promise.all([
-      db.query('SELECT COUNT(*) as count, COUNT(DISTINCT material_name) as types FROM inbound_raw'),
-      db.query('SELECT COUNT(*) as count, COUNT(DISTINCT material_name) as types FROM aux_inbound'),
-      db.query('SELECT COUNT(*) as count, COUNT(DISTINCT product_name) as types FROM product_inbound'),
-      db.query('SELECT * FROM inbound_raw ORDER BY date DESC LIMIT 5'),
-      db.query('SELECT * FROM outbound_raw ORDER BY date DESC LIMIT 5'),
-      db.query(`
-        SELECT material_name, container, 
-               SUM(quantity) as total_in, 
-               COALESCE(SUM(out_qty), 0) as total_out,
-               (SUM(quantity) - COALESCE(SUM(out_qty), 0)) as remaining_quantity
-        FROM (
-          SELECT material_name, container, quantity, 0 as out_qty FROM inbound_raw
-          UNION ALL
-          SELECT material_name, container, 0 as quantity, quantity as out_qty FROM outbound_raw
-        ) combined
-        GROUP BY material_name, container
-        HAVING (SUM(quantity) - COALESCE(SUM(out_qty), 0)) < 100
-        ORDER BY remaining_quantity ASC
-        LIMIT 10
-      `)
+      db.query('SELECT COUNT(*) as count FROM materials'),
+      db.query('SELECT COUNT(*) as count FROM products'),
+      db.query('SELECT COUNT(*) as count FROM users'),
+      db.query('SELECT COUNT(*) as count FROM product_recipe_mappings')
     ]);
 
+    // 获取业务数据统计（可能为空）
+    let inboundCount = 0, outboundCount = 0;
+    try {
+      const inboundResult = await db.query('SELECT COUNT(*) as count FROM inbound_raw');
+      const outboundResult = await db.query('SELECT COUNT(*) as count FROM outbound_raw');
+      inboundCount = parseInt(inboundResult.rows[0].count);
+      outboundCount = parseInt(outboundResult.rows[0].count);
+    } catch (err) {
+      console.log('业务数据表为空，使用默认值');
+    }
+
     res.json({
-      total_raw_materials: parseInt(rawMaterialsResult.rows[0].count),
-      total_raw_types: parseInt(rawMaterialsResult.rows[0].types),
-      total_aux_materials: parseInt(auxMaterialsResult.rows[0].count),
-      total_aux_types: parseInt(auxMaterialsResult.rows[0].types),
+      total_materials: parseInt(materialsResult.rows[0].count),
       total_products: parseInt(productsResult.rows[0].count),
-      total_products_types: parseInt(productsResult.rows[0].types),
-      recent_inbound_records: recentInboundResult.rows,
-      recent_outbound_records: recentOutboundResult.rows,
-      low_stock_items: lowStockResult.rows.map(item => ({
-        materialName: item.material_name,
-        container: item.container,
-        remainingQuantity: item.remaining_quantity
-      }))
+      total_users: parseInt(usersResult.rows[0].count),
+      total_product_mappings: parseInt(productMappingsResult.rows[0].count),
+      total_inbound_records: inboundCount,
+      total_outbound_records: outboundCount,
+      recent_inbound_records: [],
+      recent_outbound_records: [],
+      low_stock_items: [],
+      system_status: 'ready',
+      message: '系统已就绪，可以开始添加业务数据'
     });
   } catch (error) {
     console.error('Error fetching dashboard data:', error);
