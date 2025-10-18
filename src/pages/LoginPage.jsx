@@ -3,25 +3,25 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../contexts/I18nContext';
 import { useAuth } from '../contexts/AuthContext';
-import { Eye, EyeOff, Lock, User, Shield, AlertTriangle } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, Shield, AlertTriangle, Warehouse } from 'lucide-react';
+import { theme, cardStyle, primaryButtonStyle, inputStyle } from '../styles';
 
 const loginStyle = {
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
   minHeight: '100vh',
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  padding: '20px'
+  background: '#f8f9fa',
+  padding: '20px',
+  fontFamily: 'Arial, sans-serif'
 };
 
 const loginFormStyle = {
-  background: 'white',
-  padding: '48px',
-  borderRadius: '16px',
-  boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+  ...cardStyle,
   width: '100%',
   maxWidth: '420px',
-  position: 'relative'
+  padding: '40px',
+  textAlign: 'center'
 };
 
 const inputContainerStyle = {
@@ -29,65 +29,54 @@ const inputContainerStyle = {
   marginBottom: '20px'
 };
 
-const inputStyle = {
-  width: '100%',
-  padding: '16px 20px 16px 50px',
-  border: '2px solid #e1e5e9',
-  borderRadius: '12px',
+const loginInputStyle = {
+  ...inputStyle,
+  padding: '12px 16px 12px 40px',
   fontSize: '16px',
-  transition: 'all 0.3s ease',
+  border: `1px solid ${theme.colors.gray[300]}`,
+  borderRadius: '8px',
+  transition: 'border-color 0.2s ease',
   outline: 'none',
   boxSizing: 'border-box'
 };
 
 const inputFocusStyle = {
-  ...inputStyle,
-  borderColor: '#667eea',
-  boxShadow: '0 0 0 3px rgba(102, 126, 234, 0.1)'
+  ...loginInputStyle,
+  borderColor: theme.colors.primary,
+  boxShadow: `0 0 0 2px ${theme.colors.primary}20`
 };
 
 const iconStyle = {
   position: 'absolute',
-  left: '16px',
+  left: '12px',
   top: '50%',
   transform: 'translateY(-50%)',
-  color: '#6c757d',
+  color: theme.colors.gray[500],
   zIndex: 1
 };
 
 const togglePasswordStyle = {
   position: 'absolute',
-  right: '16px',
+  right: '12px',
   top: '50%',
   transform: 'translateY(-50%)',
-  color: '#6c757d',
+  color: theme.colors.gray[500],
   cursor: 'pointer',
   zIndex: 1
 };
 
-const buttonStyle = {
+const loginButtonStyle = {
+  ...primaryButtonStyle,
   width: '100%',
-  padding: '16px',
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  color: 'white',
-  border: 'none',
-  borderRadius: '12px',
+  padding: '14px 20px',
   fontSize: '16px',
   fontWeight: '600',
-  cursor: 'pointer',
   marginTop: '24px',
-  transition: 'all 0.3s ease',
-  boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
-};
-
-const buttonHoverStyle = {
-  ...buttonStyle,
-  transform: 'translateY(-2px)',
-  boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)'
+  borderRadius: '8px'
 };
 
 const errorStyle = {
-  color: '#dc3545',
+  color: theme.colors.danger,
   fontSize: '14px',
   marginTop: '8px',
   display: 'flex',
@@ -201,24 +190,25 @@ export default function LoginPage() {
             justifyContent: 'center',
             width: '64px',
             height: '64px',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            borderRadius: '50%',
-            marginBottom: '16px'
+            background: theme.colors.primary,
+            borderRadius: '12px',
+            marginBottom: '16px',
+            boxShadow: `0 4px 12px ${theme.colors.primary}30`
           }}>
-            <Shield size={32} color="white" />
+            <Warehouse size={32} color="white" />
           </div>
           <h2 style={{ 
             margin: 0, 
             fontSize: '28px', 
             fontWeight: '700',
-            color: '#2c3e50',
+            color: theme.colors.dark,
             marginBottom: '8px'
           }}>
-            {t('login.title')}
+            仓库管理系统
           </h2>
           <p style={{ 
             margin: 0, 
-            color: '#6c757d', 
+            color: theme.colors.gray[600], 
             fontSize: '16px' 
           }}>
             安全登录到仓库管理系统
@@ -236,7 +226,7 @@ export default function LoginPage() {
               onChange={(e) => setCredentials({...credentials, username: e.target.value})}
               onFocus={() => setFocusedField('username')}
               onBlur={() => setFocusedField('')}
-              style={focusedField === 'username' ? inputFocusStyle : inputStyle}
+              style={focusedField === 'username' ? inputFocusStyle : loginInputStyle}
               required
             />
           </div>
@@ -251,7 +241,7 @@ export default function LoginPage() {
               onChange={(e) => setCredentials({...credentials, password: e.target.value})}
               onFocus={() => setFocusedField('password')}
               onBlur={() => setFocusedField('')}
-              style={focusedField === 'password' ? inputFocusStyle : inputStyle}
+              style={focusedField === 'password' ? inputFocusStyle : loginInputStyle}
               required
             />
             <div onClick={togglePasswordVisibility} style={togglePasswordStyle}>
@@ -295,16 +285,8 @@ export default function LoginPage() {
           {/* 登录按钮 */}
           <button 
             type="submit" 
-            style={buttonStyle}
+            style={loginButtonStyle}
             disabled={isLoading}
-            onMouseEnter={(e) => {
-              if (!isLoading) {
-                Object.assign(e.target.style, buttonHoverStyle);
-              }
-            }}
-            onMouseLeave={(e) => {
-              Object.assign(e.target.style, buttonStyle);
-            }}
           >
             {isLoading ? '登录中...' : t('login.submit')}
           </button>
@@ -325,22 +307,22 @@ export default function LoginPage() {
         <div style={{ 
           marginTop: '24px', 
           padding: '16px', 
-          background: '#f8f9fa', 
+          background: theme.colors.gray[100], 
           borderRadius: '8px',
-          border: '1px solid #e9ecef'
+          border: `1px solid ${theme.colors.gray[200]}`
         }}>
-          <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#495057' }}>
+          <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', color: theme.colors.dark }}>
             🔐 默认账户（请及时修改密码）
           </h4>
-          <div style={{ fontSize: '13px', color: '#6c757d', lineHeight: '1.6' }}>
-            <div><strong>管理员:</strong> admin / <span style={{color: '#28a745', fontFamily: 'monospace'}}>Admin@2024!Secure</span></div>
-            <div><strong>操作员:</strong> operator / <span style={{color: '#28a745', fontFamily: 'monospace'}}>Operator@2024!Safe</span></div>
-            <div><strong>查看者:</strong> viewer / <span style={{color: '#28a745', fontFamily: 'monospace'}}>Viewer@2024!Read</span></div>
+          <div style={{ fontSize: '13px', color: theme.colors.gray[600], lineHeight: '1.6' }}>
+            <div><strong>管理员:</strong> admin / <span style={{color: theme.colors.success, fontFamily: 'monospace'}}>Admin@2024!Secure</span></div>
+            <div><strong>操作员:</strong> operator / <span style={{color: theme.colors.success, fontFamily: 'monospace'}}>Operator@2024!Safe</span></div>
+            <div><strong>查看者:</strong> viewer / <span style={{color: theme.colors.success, fontFamily: 'monospace'}}>Viewer@2024!Read</span></div>
           </div>
           <div style={{ 
             marginTop: '8px', 
             fontSize: '12px', 
-            color: '#dc3545',
+            color: theme.colors.danger,
             fontWeight: '500'
           }}>
             ⚠️ 生产环境部署前必须修改这些默认密码！
