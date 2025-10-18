@@ -19,14 +19,31 @@ const PORT = process.env.PORT || 4000;
 
 // 中间件配置
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:1234', 
-    'https://warehouse-epe-web.vercel.app',
-    'https://warehouse-epe-web.vercel.app/',
-    process.env.FRONTEND_URL
-  ].filter(Boolean),
-  credentials: true
+  origin: function (origin, callback) {
+    // 允许的域名列表
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:1234', 
+      'https://warehouse-epe-web.vercel.app',
+      'https://warehouse-epe-web.vercel.app/',
+      'https://warehouse-epe-web-git-main-aaron-yus-projects.vercel.app',
+      'https://warehouse-epe-web-git-main-aaron-yus-projects.vercel.app/',
+      process.env.FRONTEND_URL
+    ].filter(Boolean);
+    
+    // 允许所有Vercel域名
+    const isVercelDomain = origin && origin.includes('.vercel.app');
+    
+    if (!origin || allowedOrigins.includes(origin) || isVercelDomain) {
+      callback(null, true);
+    } else {
+      console.log('🚫 CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
