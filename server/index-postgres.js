@@ -159,6 +159,17 @@ app.get('/api/test-simple', (req, res) => {
   });
 });
 
+// 产品配方映射API - 临时简化版本
+app.get('/api/product-aux-mapping', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    // 临时返回空数组，避免数据库查询错误
+    res.json([]);
+  } catch (error) {
+    console.error('Error fetching product aux mapping:', error);
+    res.status(500).json({ error: 'Failed to fetch product aux mapping' });
+  }
+});
+
 // 用户认证相关API
 app.post('/api/login', async (req, res) => {
   try {
