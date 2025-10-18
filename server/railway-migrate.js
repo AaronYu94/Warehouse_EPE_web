@@ -288,7 +288,7 @@ async function migrateProductMappings() {
             product_code VARCHAR(50) NOT NULL,
             material_name VARCHAR(200) NOT NULL,
             material_code VARCHAR(50) NOT NULL,
-            quantity DECIMAL(10,3) NOT NULL,
+            quantity DECIMAL(10,3) DEFAULT 0,
             unit VARCHAR(20) NOT NULL,
             material_type VARCHAR(20) NOT NULL,
             created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -306,7 +306,7 @@ async function migrateProductMappings() {
               row.product_code, 
               row.material_name, 
               row.material_code, 
-              row.quantity, 
+              row.quantity || 0, 
               row.unit, 
               row.material_type
             ]
