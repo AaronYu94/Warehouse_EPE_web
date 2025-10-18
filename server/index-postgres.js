@@ -415,6 +415,19 @@ async function startServer() {
     // 初始化数据库
     await initDatabase();
     
+    // 在Railway环境中自动运行数据迁移
+    if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
+      console.log('🚀 检测到生产环境，开始数据迁移...');
+      try {
+        const { migrateToRailway } = require('./railway-migrate');
+        await migrateToRailway();
+        console.log('✅ 数据迁移完成');
+      } catch (migrationError) {
+        console.error('❌ 数据迁移失败:', migrationError);
+        // 不阻止服务器启动，只是记录错误
+      }
+    }
+    
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
