@@ -426,11 +426,11 @@ async function startServer() {
     try {
       console.log('📦 开始执行数据迁移...');
       
-      // 直接调用迁移函数
-      const { migrateToRailway } = require('./railway-migrate');
-      console.log('📦 迁移函数已加载');
-      
-      await migrateToRailway();
+          // 直接调用完整迁移函数
+          const { completeMigrate } = require('./complete-migrate');
+          console.log('📦 完整迁移函数已加载');
+          
+          await completeMigrate();
       console.log('✅✅✅ 数据迁移成功完成 ✅✅✅');
       
     } catch (migrationError) {
