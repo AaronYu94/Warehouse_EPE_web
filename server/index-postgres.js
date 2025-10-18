@@ -415,27 +415,30 @@ async function startServer() {
     // 初始化数据库
     await initDatabase();
     
-    // 在Railway环境中自动运行数据迁移
-    console.log('🔍 检查迁移条件...');
-    console.log('NODE_ENV:', process.env.NODE_ENV);
-    console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
-    console.log('DATABASE_URL value:', process.env.DATABASE_URL ? '已设置' : '未设置');
+    // 强制运行数据迁移 - 简化版本
+    console.log('🚀🚀🚀 开始强制数据迁移 🚀🚀🚀');
+    console.log('环境变量检查:');
+    console.log('- NODE_ENV:', process.env.NODE_ENV);
+    console.log('- DATABASE_URL存在:', !!process.env.DATABASE_URL);
+    console.log('- DATABASE_URL值:', process.env.DATABASE_URL ? '已设置' : '未设置');
     
-    // 强制运行迁移（用于调试）
-    if (process.env.DATABASE_URL) {
-      console.log('🚀 检测到DATABASE_URL，开始数据迁移...');
-      try {
-        const { migrateToRailway } = require('./railway-migrate');
-        await migrateToRailway();
-        console.log('✅ 数据迁移完成');
-      } catch (migrationError) {
-        console.error('❌ 数据迁移失败:', migrationError);
-        console.error('错误详情:', migrationError.message);
-        console.error('错误堆栈:', migrationError.stack);
-        // 不阻止服务器启动，只是记录错误
-      }
-    } else {
-      console.log('⚠️ 未找到DATABASE_URL，跳过数据迁移');
+    // 直接运行迁移，不检查条件
+    try {
+      console.log('📦 开始执行数据迁移...');
+      
+      // 直接调用迁移函数
+      const { migrateToRailway } = require('./railway-migrate');
+      console.log('📦 迁移函数已加载');
+      
+      await migrateToRailway();
+      console.log('✅✅✅ 数据迁移成功完成 ✅✅✅');
+      
+    } catch (migrationError) {
+      console.error('❌❌❌ 数据迁移失败 ❌❌❌');
+      console.error('错误类型:', migrationError.name);
+      console.error('错误消息:', migrationError.message);
+      console.error('错误堆栈:', migrationError.stack);
+      console.error('完整错误对象:', migrationError);
     }
     
     app.listen(PORT, () => {
