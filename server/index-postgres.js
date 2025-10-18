@@ -475,6 +475,105 @@ app.get('/api/product-mappings', verifyToken, checkPermission('data.view'), asyn
   }
 });
 
+// 原料入库API
+app.get('/api/raw-inout', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM inbound_raw ORDER BY date DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching raw inbound records:', error);
+    res.status(500).json({ error: 'Failed to fetch raw inbound records' });
+  }
+});
+
+// 原料出库API
+app.get('/api/raw-out', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM outbound_raw ORDER BY date DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching raw outbound records:', error);
+    res.status(500).json({ error: 'Failed to fetch raw outbound records' });
+  }
+});
+
+// 原料出库API (别名)
+app.get('/api/raw-outbound', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM outbound_raw ORDER BY date DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching raw outbound records:', error);
+    res.status(500).json({ error: 'Failed to fetch raw outbound records' });
+  }
+});
+
+// 辅料入库API
+app.get('/api/aux-inout', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM aux_inbound ORDER BY date DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching aux inbound records:', error);
+    res.status(500).json({ error: 'Failed to fetch aux inbound records' });
+  }
+});
+
+// 辅料出库API
+app.get('/api/aux-outbound', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM aux_outbound ORDER BY date DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching aux outbound records:', error);
+    res.status(500).json({ error: 'Failed to fetch aux outbound records' });
+  }
+});
+
+// 产品入库API
+app.get('/api/product-inbound', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM product_inbound ORDER BY date DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching product inbound records:', error);
+    res.status(500).json({ error: 'Failed to fetch product inbound records' });
+  }
+});
+
+// 产品出库API
+app.get('/api/product-outbound', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM product_outbound ORDER BY date DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching product outbound records:', error);
+    res.status(500).json({ error: 'Failed to fetch product outbound records' });
+  }
+});
+
+// 产品辅助物料API
+app.get('/api/product-aux-inbound', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM product_recipe_mappings ORDER BY product_name');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching product aux mappings:', error);
+    res.status(500).json({ error: 'Failed to fetch product aux mappings' });
+  }
+});
+
+// 财务管理API
+app.get('/api/finance/raw-inbound', verifyToken, checkPermission('data.view'), async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM inbound_raw ORDER BY date DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching finance data:', error);
+    res.status(500).json({ error: 'Failed to fetch finance data' });
+  }
+});
+
 // 错误处理中间件
 app.use((error, req, res, next) => {
   console.error('Server error:', error);
