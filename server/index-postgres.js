@@ -215,6 +215,62 @@ app.get('/api/test-simple', (req, res) => {
   });
 });
 
+// 创建缺失表的端点（不需要认证）
+app.get('/api/create-missing-tables', async (req, res) => {
+  try {
+    console.log('🔧 开始创建缺失的表...');
+    
+    // 创建 inbound_aux 表
+    try {
+      await db.query(`
+        CREATE TABLE IF NOT EXISTS inbound_aux (
+          id SERIAL PRIMARY KEY,
+          date DATE NOT NULL,
+          code VARCHAR(50) NOT NULL,
+          name VARCHAR(200) NOT NULL,
+          container VARCHAR(50) NOT NULL,
+          qty NUMERIC(12,3) NOT NULL,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      console.log('✅ 表 inbound_aux 已创建');
+    } catch (error) {
+      console.log('⚠️ 表 inbound_aux 创建失败或已存在:', error.message);
+    }
+    
+    // 创建 outbound_aux 表
+    try {
+      await db.query(`
+        CREATE TABLE IF NOT EXISTS outbound_aux (
+          id SERIAL PRIMARY KEY,
+          date DATE NOT NULL,
+          container VARCHAR(50) NOT NULL,
+          code VARCHAR(50) NOT NULL,
+          name VARCHAR(200) NOT NULL,
+          qty NUMERIC(12,3) NOT NULL,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      console.log('✅ 表 outbound_aux 已创建');
+    } catch (error) {
+      console.log('⚠️ 表 outbound_aux 创建失败或已存在:', error.message);
+    }
+    
+    res.json({
+      success: true,
+      message: '缺失的表已创建',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
 // 产品配方映射API - 临时简化版本
 app.get('/api/product-aux-mapping', verifyToken, checkPermission('data.view'), async (req, res) => {
   try {
