@@ -1,0 +1,314 @@
+#!/usr/bin/env node
+
+/**
+ * Railway数据迁移脚本
+ * 将客户SQLite数据迁移到Railway PostgreSQL数据库
+ */
+
+const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
+const fs = require('fs');
+const path = require('path');
+
+// 配置
+const SQLITE_DB_PATH = path.join(__dirname, '../customer-data.db');
+const POSTGRES_URL = process.env.DATABASE_URL;
+
+if (!POSTGRES_URL) {
+  console.error('❌ 错误: 未找到 DATABASE_URL 环境变量');
+  console.log('请确保在Railway中设置了DATABASE_URL环境变量');
+  process.exit(1);
+}
+
+console.log('🚀 开始Railway数据迁移...');
+console.log('📊 数据源:', SQLITE_DB_PATH);
+console.log('🎯 目标:', POSTGRES_URL.replace(/\/\/.*@/, '//***@')); // 隐藏密码
+
+// 连接PostgreSQL
+const pgPool = new Pool({
+  connectionString: POSTGRES_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+// 连接SQLite
+const sqliteDb = new sqlite3.Database(SQLITE_DB_PATH);
+
+// 迁移统计
+let migrationStats = {
+  users: 0,
+  materials: 0,
+  products: 0,
+  productMappings: 0,
+  errors: 0
+};
+
+// 主迁移函数
+async function migrateToRailway() {
+  try {
+    console.log('🔗 连接数据库...');
+    
+    // 测试PostgreSQL连接
+    await pgPool.query('SELECT 1');
+    console.log('✅ PostgreSQL连接成功');
+    
+    // 测试SQLite连接
+    await new Promise((resolve, reject) => {
+      sqliteDb.get('SELECT 1', (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+    console.log('✅ SQLite连接成功');
+    
+    // 开始迁移
+    console.log('\n📦 开始数据迁移...');
+    
+    // 1. 迁移用户数据
+    await migrateUsers();
+    
+    // 2. 迁移物料数据
+    await migrateMaterials();
+    
+    // 3. 迁移产品数据
+    await migrateProducts();
+    
+    // 4. 迁移产品配方数据
+    await migrateProductMappings();
+    
+    // 5. 创建安全密码
+    await createSecurePasswords();
+    
+    console.log('\n🎉 Railway数据迁移完成！');
+    console.log('📊 迁移统计:');
+    console.log(`   ✅ 用户: ${migrationStats.users}`);
+    console.log(`   ✅ 物料: ${migrationStats.materials}`);
+    console.log(`   ✅ 产品: ${migrationStats.products}`);
+    console.log(`   ✅ 配方: ${migrationStats.productMappings}`);
+    console.log(`   ❌ 错误: ${migrationStats.errors}`);
+    
+    console.log('\n🔐 新的安全密码:');
+    console.log('   管理员: admin / Admin@2024!Secure');
+    console.log('   操作员: operator / Operator@2024!Safe');
+    console.log('   查看者: viewer / Viewer@2024!Read');
+    
+  } catch (error) {
+    console.error('❌ 迁移失败:', error);
+    migrationStats.errors++;
+  } finally {
+    await pgPool.end();
+    sqliteDb.close();
+    console.log('\n🔚 数据库连接已关闭');
+  }
+}
+
+// 迁移用户数据
+async function migrateUsers() {
+  console.log('👥 迁移用户数据...');
+  
+  return new Promise((resolve, reject) => {
+    sqliteDb.all('SELECT * FROM users', async (err, rows) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      
+      try {
+        for (const row of rows) {
+          // 使用UUID作为新ID
+          await pgPool.query(
+            `INSERT INTO users (id, username, password, role, created_at, updated_at) 
+             VALUES (uuid_generate_v4(), $1, $2, $3, NOW(), NOW()) 
+             ON CONFLICT (username) DO UPDATE SET 
+             password = EXCLUDED.password, 
+             role = EXCLUDED.role,
+             updated_at = NOW()`,
+            [row.username, row.password, row.role]
+          );
+          migrationStats.users++;
+        }
+        console.log(`   ✅ 迁移了 ${rows.length} 个用户`);
+        resolve();
+      } catch (error) {
+        console.error('   ❌ 用户迁移失败:', error);
+        migrationStats.errors++;
+        reject(error);
+      }
+    });
+  });
+}
+
+// 迁移物料数据
+async function migrateMaterials() {
+  console.log('📦 迁移物料数据...');
+  
+  return new Promise((resolve, reject) => {
+    sqliteDb.all('SELECT * FROM materials', async (err, rows) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      
+      try {
+        // 创建物料参考表
+        await pgPool.query(`
+          CREATE TABLE IF NOT EXISTS material_references (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            code VARCHAR(50) UNIQUE NOT NULL,
+            name VARCHAR(200) NOT NULL,
+            unit VARCHAR(20) NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          )
+        `);
+        
+        for (const row of rows) {
+          await pgPool.query(
+            'INSERT INTO material_references (code, name, unit) VALUES ($1, $2, $3) ON CONFLICT (code) DO NOTHING',
+            [row.code, row.name, row.unit]
+          );
+          migrationStats.materials++;
+        }
+        console.log(`   ✅ 迁移了 ${rows.length} 个物料`);
+        resolve();
+      } catch (error) {
+        console.error('   ❌ 物料迁移失败:', error);
+        migrationStats.errors++;
+        reject(error);
+      }
+    });
+  });
+}
+
+// 迁移产品数据
+async function migrateProducts() {
+  console.log('🏭 迁移产品数据...');
+  
+  return new Promise((resolve, reject) => {
+    sqliteDb.all('SELECT * FROM products', async (err, rows) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      
+      try {
+        // 创建产品参考表
+        await pgPool.query(`
+          CREATE TABLE IF NOT EXISTS product_references (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            code VARCHAR(50) UNIQUE NOT NULL,
+            name VARCHAR(200) NOT NULL,
+            unit VARCHAR(20) NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          )
+        `);
+        
+        for (const row of rows) {
+          await pgPool.query(
+            'INSERT INTO product_references (code, name, unit) VALUES ($1, $2, $3) ON CONFLICT (code) DO NOTHING',
+            [row.code, row.name, row.unit]
+          );
+          migrationStats.products++;
+        }
+        console.log(`   ✅ 迁移了 ${rows.length} 个产品`);
+        resolve();
+      } catch (error) {
+        console.error('   ❌ 产品迁移失败:', error);
+        migrationStats.errors++;
+        reject(error);
+      }
+    });
+  });
+}
+
+// 迁移产品配方数据
+async function migrateProductMappings() {
+  console.log('🔗 迁移产品配方数据...');
+  
+  return new Promise((resolve, reject) => {
+    sqliteDb.all('SELECT * FROM product_aux_mapping', async (err, rows) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      
+      try {
+        // 创建产品配方表
+        await pgPool.query(`
+          CREATE TABLE IF NOT EXISTS product_recipe_mappings (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            product_name VARCHAR(200) NOT NULL,
+            product_code VARCHAR(50) NOT NULL,
+            material_name VARCHAR(200) NOT NULL,
+            material_code VARCHAR(50) NOT NULL,
+            quantity DECIMAL(10,3) NOT NULL,
+            unit VARCHAR(20) NOT NULL,
+            material_type VARCHAR(20) NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          )
+        `);
+        
+        for (const row of rows) {
+          await pgPool.query(
+            `INSERT INTO product_recipe_mappings 
+             (product_name, product_code, material_name, material_code, quantity, unit, material_type) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [
+              row.product_name, 
+              row.product_code, 
+              row.material_name, 
+              row.material_code, 
+              row.quantity, 
+              row.unit, 
+              row.material_type
+            ]
+          );
+          migrationStats.productMappings++;
+        }
+        console.log(`   ✅ 迁移了 ${rows.length} 个产品配方`);
+        resolve();
+      } catch (error) {
+        console.error('   ❌ 产品配方迁移失败:', error);
+        migrationStats.errors++;
+        reject(error);
+      }
+    });
+  });
+}
+
+// 创建安全密码
+async function createSecurePasswords() {
+  console.log('🔐 创建安全密码...');
+  
+  const bcrypt = require('bcryptjs');
+  
+  const securePasswords = {
+    admin: 'Admin@2024!Secure',
+    operator: 'Operator@2024!Safe',
+    viewer: 'Viewer@2024!Read'
+  };
+  
+  for (const [username, password] of Object.entries(securePasswords)) {
+    try {
+      const hashedPassword = await bcrypt.hash(password, 12);
+      
+      await pgPool.query(
+        'UPDATE users SET password = $1 WHERE username = $2',
+        [hashedPassword, username]
+      );
+      
+      console.log(`   ✅ 用户 ${username} 密码已更新为安全密码`);
+    } catch (error) {
+      console.error(`   ❌ 更新用户 ${username} 密码失败:`, error);
+      migrationStats.errors++;
+    }
+  }
+}
+
+// 运行迁移
+if (require.main === module) {
+  migrateToRailway().catch(console.error);
+}
+
+module.exports = { migrateToRailway };

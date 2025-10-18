@@ -4,8 +4,10 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npm start",
-    "healthcheckPath": "/api/health",
-    "healthcheckTimeout": 30000
+    "startCommand": "node index-postgres.js",
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 100,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
   }
 }
