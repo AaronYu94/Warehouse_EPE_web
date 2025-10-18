@@ -11,7 +11,7 @@ const fs = require('fs');
 const path = require('path');
 
 // 配置
-const SQLITE_DB_PATH = path.join(__dirname, '../customer-data.db');
+const SQLITE_DB_PATH = path.join(__dirname, 'customer-data.db');
 const POSTGRES_URL = process.env.DATABASE_URL;
 
 if (!POSTGRES_URL) {
