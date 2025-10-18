@@ -290,7 +290,7 @@ async function migrateProductMappings() {
             material_code VARCHAR(50) NOT NULL,
             quantity DECIMAL(10,3) DEFAULT 0,
             unit VARCHAR(20) NOT NULL,
-            material_type VARCHAR(20) NOT NULL,
+            material_type VARCHAR(20) DEFAULT 'raw',
             created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
             updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
           )
@@ -308,7 +308,7 @@ async function migrateProductMappings() {
               row.material_code, 
               row.quantity || 0, 
               row.unit, 
-              row.material_type
+              row.material_type || 'raw'
             ]
           );
           migrationStats.productMappings++;
