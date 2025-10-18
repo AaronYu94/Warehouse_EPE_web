@@ -343,7 +343,7 @@ app.post('/api/aux-outbound', async (req, res) => {
 });
 
 // 成品入库API
-app.get('/api/product-inbound', async (req, res) => {
+app.get('/api/product-inbound', verifyToken, checkPermission('data.view'), async (req, res) => {
   try {
     const result = await db.query(
       'SELECT * FROM product_inbound ORDER BY date DESC, created_at DESC'
@@ -373,7 +373,7 @@ app.post('/api/product-inbound', async (req, res) => {
 });
 
 // 成品出库API
-app.get('/api/product-outbound', async (req, res) => {
+app.get('/api/product-outbound', verifyToken, checkPermission('data.view'), async (req, res) => {
   try {
     const result = await db.query(
       'SELECT * FROM product_outbound ORDER BY date DESC, created_at DESC'

@@ -33,20 +33,20 @@ export default function ReferenceDataPage() {
   };
 
   const filteredProducts = referenceData?.products?.filter(product => {
-    const matchesSearch = product.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.product_code.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = product.product_name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+                         product.product_code?.toLowerCase()?.includes(searchTerm.toLowerCase());
     return matchesSearch;
   }) || [];
 
   const filteredRawMaterials = referenceData?.raw_materials?.filter(material => {
-    const matchesSearch = material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         material.code.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = material.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+                         material.code?.toLowerCase()?.includes(searchTerm.toLowerCase());
     return matchesSearch;
   }) || [];
 
   const filteredAuxMaterials = referenceData?.auxiliary_materials?.filter(material => {
-    const matchesSearch = material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         material.code.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = material.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+                         material.code?.toLowerCase()?.includes(searchTerm.toLowerCase());
     return matchesSearch;
   }) || [];
 

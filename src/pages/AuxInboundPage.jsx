@@ -137,8 +137,8 @@ export default function AuxInboundPage() {
   };
 
   const filteredRecords = inboundRecords.filter(record =>
-    record.aux_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    record.aux_code?.toLowerCase().includes(searchTerm.toLowerCase())
+    record.aux_name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+    record.aux_code?.toLowerCase()?.includes(searchTerm.toLowerCase())
   );
 
   return (

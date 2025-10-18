@@ -272,8 +272,8 @@ export default function ProductOutboundPage() {
   };
 
   const filteredRecords = outboundRecords.filter(record =>
-    record.product_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    record.batch_number?.toLowerCase().includes(searchTerm.toLowerCase())
+    record.product_name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+    record.batch_number?.toLowerCase()?.includes(searchTerm.toLowerCase())
   );
 
   const formatDate = (dateString) => {

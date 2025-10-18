@@ -90,8 +90,8 @@ export default function RawOutboundPage() {
   };
 
   const filteredRecords = outboundRecords.filter(record =>
-    record.material_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    record.container?.toLowerCase().includes(searchTerm.toLowerCase())
+    record.material_name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+    record.container?.toLowerCase()?.includes(searchTerm.toLowerCase())
   );
 
   const formatDate = (dateString) => {
