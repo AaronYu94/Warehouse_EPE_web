@@ -358,6 +358,9 @@ async function createDefaultData() {
   console.log('📦 创建默认数据...');
   
   try {
+    // 启用UUID扩展
+    await pgPool.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+    
     // 创建用户表
     await pgPool.query(`
       CREATE TABLE IF NOT EXISTS users (
