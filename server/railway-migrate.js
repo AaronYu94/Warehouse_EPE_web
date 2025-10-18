@@ -196,9 +196,9 @@ async function migrateMaterials() {
       }
       
       try {
-        // 创建物料参考表
+        // 创建物料表
         await pgPool.query(`
-          CREATE TABLE IF NOT EXISTS material_references (
+          CREATE TABLE IF NOT EXISTS materials (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             code VARCHAR(50) UNIQUE NOT NULL,
             name VARCHAR(200) NOT NULL,
@@ -210,7 +210,7 @@ async function migrateMaterials() {
         
         for (const row of rows) {
           await pgPool.query(
-            'INSERT INTO material_references (code, name, unit) VALUES ($1, $2, $3) ON CONFLICT (code) DO NOTHING',
+            'INSERT INTO materials (code, name, unit) VALUES ($1, $2, $3) ON CONFLICT (code) DO NOTHING',
             [row.code, row.name, row.unit]
           );
           migrationStats.materials++;
@@ -238,9 +238,9 @@ async function migrateProducts() {
       }
       
       try {
-        // 创建产品参考表
+        // 创建产品表
         await pgPool.query(`
-          CREATE TABLE IF NOT EXISTS product_references (
+          CREATE TABLE IF NOT EXISTS products (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             code VARCHAR(50) UNIQUE NOT NULL,
             name VARCHAR(200) NOT NULL,
@@ -252,7 +252,7 @@ async function migrateProducts() {
         
         for (const row of rows) {
           await pgPool.query(
-            'INSERT INTO product_references (code, name, unit) VALUES ($1, $2, $3) ON CONFLICT (code) DO NOTHING',
+            'INSERT INTO products (code, name, unit) VALUES ($1, $2, $3) ON CONFLICT (code) DO NOTHING',
             [row.code, row.name, row.unit]
           );
           migrationStats.products++;
