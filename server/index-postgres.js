@@ -322,18 +322,7 @@ app.post('/api/raw-out', verifyToken, checkPermission('data.create'), async (req
   }
 });
 
-// 辅料入库API
-app.get('/api/aux-inout', verifyToken, checkPermission('data.view'), async (req, res) => {
-  try {
-    const result = await db.query(
-      'SELECT * FROM aux_inbound ORDER BY date DESC, created_at DESC'
-    );
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching aux inbound records:', error);
-    res.status(500).json({ error: 'Failed to fetch records' });
-  }
-});
+// 辅料入库API - 已移动到下方简化版本
 
 app.post('/api/aux-inout', async (req, res) => {
   try {
@@ -352,18 +341,7 @@ app.post('/api/aux-inout', async (req, res) => {
   }
 });
 
-// 辅料出库API
-app.get('/api/aux-outbound', async (req, res) => {
-  try {
-    const result = await db.query(
-      'SELECT * FROM aux_outbound ORDER BY date DESC, created_at DESC'
-    );
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching aux outbound records:', error);
-    res.status(500).json({ error: 'Failed to fetch records' });
-  }
-});
+// 辅料出库API - 已移动到下方简化版本
 
 app.post('/api/aux-outbound', async (req, res) => {
   try {
