@@ -53,9 +53,7 @@ export default function AuxInboundPage() {
         formDataToSend.append('quality_report', formData.qualityReport);
       }
 
-      const response = await api.post("/api/aux-inout",
-        body: formDataToSend
-      });
+      const response = await api.upload("/api/aux-inout", formDataToSend);
 
       if (response.ok) {
         const result = await response.json();

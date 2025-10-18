@@ -54,12 +54,7 @@ export default function RawOutboundPage() {
         notes: formData.notes
       };
       
-      const response = await api.post("/api/raw-out",
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(apiData)
-      });
+      const response = await api.post("/api/raw-out", apiData);
 
       if (response.ok) {
         const result = await response.json();

@@ -224,12 +224,7 @@ export default function ProductOutboundPage() {
             aux_usage: materialUsageJson
           };
           
-          const response = await api.post("/api/product-outbound",
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(apiData)
-          });
+          const response = await api.post("/api/product-outbound", apiData);
 
           if (!response.ok) {
             const error = await response.json();

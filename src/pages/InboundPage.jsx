@@ -56,9 +56,7 @@ export default function InboundPage() {
         formDataToSend.append('quality_report', formData.qualityReport);
       }
 
-      const response = await api.post("/api/raw-inout",
-        body: formDataToSend
-      });
+      const response = await api.upload("/api/raw-inout", formDataToSend);
 
       if (response.ok) {
         const result = await response.json();

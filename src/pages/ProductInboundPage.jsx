@@ -56,12 +56,7 @@ export default function ProductInboundPage() {
         notes: formData.notes
       };
       
-      const response = await api.post("/api/product-inbound",
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(apiData)
-      });
+      const response = await api.post("/api/product-inbound", apiData);
 
       if (response.ok) {
         const result = await response.json();
